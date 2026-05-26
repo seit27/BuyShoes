@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [ "production", "development" ]
+  pull_request:
+    branches: [ "production" ]
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Select Xcode 26.4.1
+      run: |
+        sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+        xcodebuild -version
+    
+    - name: Run tests
+      run: |
+        xcodebuild test \
+          -project BuyShoes.xcodeproj \
+          -scheme BuyShoes \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.4' \
+          -only-testing:BuyShoesTests \
+          -only-testing:BuyShoesUITests
