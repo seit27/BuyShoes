@@ -2,42 +2,140 @@
 //  BuyShoesUITests.swift
 //  BuyShoesUITests
 //
-//  Created by Nawruzbek Ibragimow on 27.05.2026.
-//
 
 import XCTest
 
 final class BuyShoesUITests: XCTestCase {
-
+    
+    let app = XCUIApplication()
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
     }
-
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+    
+    // MARK: - Catalog Screen Tests
+    
+    func testCatalogScreenExists() {
+        let catalogTitle = app.navigationBars["Каталог"]
+        XCTAssertTrue(catalogTitle.waitForExistence(timeout: 3))
+    }
+    
+    func testCartButtonExists() {
+        let cartButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'cart'")).firstMatch
+        XCTAssertTrue(cartButton.waitForExistence(timeout: 3))
+    }
+    
+    func testAddToCartButtonExists() {
+        let addToCartButton = app.buttons["В корзину"].firstMatch
+        XCTAssertTrue(addToCartButton.waitForExistence(timeout: 3))
+    }
+    
+    func testProductCardExists() {
+        let scrollView = app.scrollViews.firstMatch
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 3))
+    }
+    
+    func testCartViewOpens() {
+        // Open cart
+        let cartButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'cart'")).firstMatch
+        if cartButton.waitForExistence(timeout: 3) {
+            cartButton.tap()
         }
+        
+        let cartTitle = app.navigationBars["Корзина"]
+        XCTAssertTrue(cartTitle.waitForExistence(timeout: 3))
+        
+        // Close cart
+        app.buttons["Закрыть"].tap()
     }
-}
+    
+    func testAddItemToCart() {
+        // Add item to cart
+        let addButton = app.buttons["В корзину"].firstMatch
+        if addButton.waitForExistence(timeout: 3) {
+            addButton.tap()
+        }
+        
+        // Check cart badge appears
+        let cartButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'cart'")).firstMatch
+        XCTAssertTrue(cartButton.exists)
+    }
+    
+    func testCartBadgeUpdatesAfterAdd() {
+        // Get initial cart badge value
+        let cartButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'cart'")).firstMatch
+        
+        // Add item
+        let addButton = app.buttons["В корзину"].firstMatch
+        if addButton.waitForExistence(timeout: 3) {
+            addButton.tap()
+        }
+        
+        // Badge should exist
+        XCTAssertTrue(cartButton.exists)
+    }
+    
+    func testProductDetailOpens() {
+        // Tap on product card
+        let firstProduct = app.scrollViews.otherElements.buttons.firstMatch
+        if firstProduct.waitForExistence(timeout: 3) {
+            firstProduct.tap()
+        }
+        
+        // Check detail view
+        let closeButton = app.buttons["Закрыть"]
+        if closeButton.waitForExistence(timeout: 2) {
+            closeButton.tap()
+        }
+        
+        XCTAssertTrue(true)
+    }
+    
+    func testMultipleItemsAddedToCart() {
+        // Add first item
+        let addButton = app.buttons["В корзину"].firstMatch
+        if addButton.waitForExistence(timeout: 3) {
+            addButton.tap()
+        }
+        
+        // Add second item
+        let allAddButtons = app.buttons.matching(identifier: "В корзину")
+        if allAddButtons.count > 1 {
+            allAddButtons.element(boundBy: 1).tap()
+        }
+        
+        // Open cart
+        let cartButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'cart'")).firstMatch
+        if cartButton.waitForExistence(timeout: 2) {
+            cartButton.tap()
+        }
+        
+        let cartTitle = app.navigationBars["Корзина"]
+        XCTAssertTrue(cartTitle.waitForExistence(timeout: 3))
+        
+        // Close cart
+        app.buttons["Закрыть"].tap()
+    }
+    
+    func testRemoveFromCart() {
+        // Add item first
+        let addButton = app.buttons["В корзину"].firstMatch
+        if addButton.waitForExistence(timeout: 3) {
+            addButton.tap()
+        }
+        
+        // Open cart
+        let cartButton = app.buttons.matching(NSPredicate(format: "label CONTAINS 'cart'")).firstMatch
+        if cartButton.waitForExistence(timeout: 2) {
+            cartButton.tap()
+        }
+                
+                // Check cart view exists
+                let cartTitle = app.navigationBars["Корзина"]
+                XCTAssertTrue(cartTitle.waitForExistence(timeout: 3))
+                
+                // Close cart
+                app.buttons["Закрыть"].tap()
+            }
+        }

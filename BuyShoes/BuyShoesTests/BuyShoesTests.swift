@@ -2,37 +2,96 @@
 //  BuyShoesTests.swift
 //  BuyShoesTests
 //
-//  Created by Nawruzbek Ibragimow on 27.05.2026.
-//
 
 import XCTest
 @testable import BuyShoes
 
 final class BuyShoesTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    
+    // MARK: - CartManager Tests
+    
+    func testAddToCart() {
+        let cartManager = CartManager()
+        let product = Product.sampleProducts[0]
+        cartManager.addToCart(product: product)
+        XCTAssertEqual(cartManager.itemCount, 1)
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    func testAddMultipleToCart() {
+        let cartManager = CartManager()
+        let product = Product.sampleProducts[0]
+        cartManager.addToCart(product: product)
+        cartManager.addToCart(product: product)
+        XCTAssertEqual(cartManager.itemCount, 2)
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-        // XCTest Documentation
-        // https://developer.apple.com/documentation/xctest
+    
+    func testRemoveFromCart() {
+        let cartManager = CartManager()
+        let product = Product.sampleProducts[0]
+        cartManager.addToCart(product: product)
+        cartManager.removeFromCart(productId: product.id)
+        XCTAssertEqual(cartManager.itemCount, 0)
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    
+    func testUpdateQuantity() {
+        let cartManager = CartManager()
+        let product = Product.sampleProducts[0]
+        cartManager.addToCart(product: product)
+        cartManager.updateQuantity(productId: product.id, quantity: 5)
+        XCTAssertEqual(cartManager.cartItems.first?.quantity, 5)
     }
-
+    
+    func testTotalPrice() {
+        let cartManager = CartManager()
+        let product1 = Product.sampleProducts[0]
+        let product2 = Product.sampleProducts[1]
+        cartManager.addToCart(product: product1)
+        cartManager.addToCart(product: product2)
+        let expectedTotal = 129.99 + 115.99
+        XCTAssertEqual(cartManager.totalPrice, expectedTotal, accuracy: 0.01)
+    }
+    
+    func testClearCart() {
+        let cartManager = CartManager()
+        let product = Product.sampleProducts[0]
+        cartManager.addToCart(product: product)
+        cartManager.clearCart()
+        XCTAssertEqual(cartManager.itemCount, 0)
+    }
+    
+    func testCartItemCountWithMultipleProducts() {
+        let cartManager = CartManager()
+        let product1 = Product.sampleProducts[0]
+        let product2 = Product.sampleProducts[1]
+        cartManager.addToCart(product: product1)
+        cartManager.addToCart(product: product1)
+        cartManager.addToCart(product: product2)
+        XCTAssertEqual(cartManager.itemCount, 3)
+    }
+    
+    // MARK: - Product Tests
+    
+    func testProductHasValidPrice() {
+        let product = Product.sampleProducts[0]
+        XCTAssertGreaterThan(product.price, 0)
+    }
+    
+    func testProductHasValidName() {
+        let product = Product.sampleProducts[0]
+        XCTAssertFalse(product.name.isEmpty)
+    }
+    
+    func testProductHasValidBrand() {
+        let product = Product.sampleProducts[0]
+        XCTAssertFalse(product.brand.isEmpty)
+    }
+    
+    func testCartTotalPriceAfterRemove() {
+        let cartManager = CartManager()
+        let product = Product.sampleProducts[0]
+        cartManager.addToCart(product: product)
+        cartManager.removeFromCart(productId: product.id)
+        XCTAssertEqual(cartManager.totalPrice, 0.0)
+    }
 }
+
